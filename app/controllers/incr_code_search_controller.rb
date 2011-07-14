@@ -35,7 +35,7 @@ class IncrCodeSearchController < ApplicationController
     when Redmine::Scm::Adapters::GitAdapter
       "git --git-dir #{@project.repository.url}  ls-tree -r --name-only HEAD:"
     when Redmine::Scm::Adapters::SubversionAdapter
-      "svn ls -R #{@project.repository.url}"
+      "svn ls -R #{@project.repository.url}" << @project.repository.scm.public_credentials_string
     when Redmine::Scm::Adapters::MercurialAdapter
       "hg locate -R #{@project.repository.url}"
     end
@@ -45,3 +45,14 @@ class IncrCodeSearchController < ApplicationController
     not project.repository.nil? and SUPPORT_SCMS.include?(@project.repository.scm.class)
   end
 end
+# monkey patch for authling info
+class Redmine::Scm::Adapters::SubversionAdapter
+  def public_credentials_string
+    str = ''
+    str << " --username #{shell_quote(@login)}" unless @login.blank?
+    str << " --password #{shell_quote(@password)}" unless @login.blank? || @password.blank?
+    str << " --no-auth-cache --non-interactive"
+    str
+  end
+end
+
