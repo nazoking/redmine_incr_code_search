@@ -12,15 +12,16 @@
 var files = null;
 function listFiles() {
   var regexp = new RegExp($('keyword').value, 'ig');
-  var html = '';
+  var html = [];
   for (var i = 0, len = files.length; i < len; i++) {
     if (files[i].match(regexp)) {
       url = "<%= url_for(:controller => 'repositories', :action => 'entry', :id => @project) %>/" +  files[i];
       highlightedText = files[i].replace(regexp, "<span style='color: red; background-color: yellow;'>$&</span>");
-      html += "<p><a href='" + url + "'>" + highlightedText + "</a></p>";
+      html.push( "<p><a href='" + url + "'>" + highlightedText + "</a></p>" );
+      if(html.length > 100 )break;
     }
   }
-  $('result').update(html);
+  $('result').update(html.join(""));
 }
 
 Event.observe(window, "load", function() { 
